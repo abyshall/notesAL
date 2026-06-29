@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catatan Belanja Hari Ini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FFF8EC;
+    --paper-2: #FFF1D6;
+    --ink: #2B2118;
+    --ink-soft: #6B5D4F;
+    --coral: #FF5A5F;
+    --coral-dark: #C23B40;
+    --mint: #2EC4A6;
+    --mint-dark: #1C8C75;
+    --sun: #FFC857;
+    --sun-dark: #B5860C;
+    --violet: #8B7FD1;
+    --violet-dark: #5C4FA6;
+    --line: rgba(43, 33, 24, 0.12);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(43,33,24,0.045) 1px, transparent 0);
+    background-size: 18px 18px;
+  }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+
+  /* ---------- HEADER ---------- */
+  .header {
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  .header .date {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 26px;
+    margin: 4px 0 0;
+    font-weight: 700;
+  }
+  .header h1 .squig {
+    display: inline-block;
+    position: relative;
+  }
+
+  /* ---------- TOTAL STAMP ---------- */
+  .total-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 22px 0 26px;
+  }
+  .total-number {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 56px;
+    font-weight: 800;
+    color: var(--coral-dark);
+    line-height: 1;
+    transition: transform 0.15s ease;
+  }
+  .total-number.bump {
+    transform: scale(1.08) rotate(-2deg);
+  }
+  .total-label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  .budget-jar {
+    width: 100%;
+    max-width: 320px;
+    margin-top: 16px;
+  }
+  .jar-track {
+    height: 14px;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+  .jar-fill {
+    height: 100%;
+    background: var(--mint);
+    border-radius: 10px 0 0 10px;
+    transition: width 0.4s ease, background 0.3s ease;
+  }
+  .jar-fill.over {
+    background: var(--coral);
+  }
+  .jar-caption {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  /* ---------- BUDGET INPUT ---------- */
+  .budget-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 10px;
+  }
+  .budget-row input {
+    width: 70px;
+    border: none;
+    border-bottom: 2px dashed var(--ink-soft);
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--ink);
+    text-align: center;
+    padding: 2px 4px;
+  }
+  .budget-row input:focus { outline: none; border-color: var(--ink); }
+
+  /* ---------- QUICK ADD STAMPS ---------- */
+  .section-label {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 10px 4px;
+    color: var(--ink);
+  }
+  .stamp-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .stamp-btn {
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    padding: 12px 4px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+    box-shadow: 0 3px 0 var(--ink);
+  }
+  .stamp-btn:hover { transform: translateY(-2px); }
+  .stamp-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--ink);
+  }
+  .stamp-btn:focus-visible,
+  .custom-form button:focus-visible,
+  .reset-row button:focus-visible,
+  .receipt-delete:focus-visible {
+    outline: 3px solid var(--violet);
+    outline-offset: 2px;
+  }
+  .custom-form input:focus-visible,
+  .budget-row input:focus-visible {
+    outline: 3px solid var(--violet);
+    outline-offset: 1px;
+  }
+  .stamp-icon { font-size: 22px; line-height: 1; }
+  .stamp-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .stamp-btn.food { background: #FFE3DD; }
+  .stamp-btn.transport { background: #E3F3FF; }
+  .stamp-btn.fun { background: #F1E9FF; }
+  .stamp-btn.shop { background: #FFF3D6; }
+  .stamp-btn.bills { background: #E1F7EE; }
+  .stamp-btn.coffee { background: #FFEAD2; }
+  .stamp-btn.health { background: #FFE1EC; }
+  .stamp-btn.other { background: #ECECEC; }
+
+  /* ---------- ADD CUSTOM FORM ---------- */
+  .custom-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 26px;
+  }
+  .custom-form input {
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    background: #fff;
+    color: var(--ink);
+  }
+  .custom-form input::placeholder { color: #B3A795; }
+  .custom-form .name-input { flex: 1.4; min-width: 0; }
+  .custom-form .amt-input { flex: 1; min-width: 0; }
+  .custom-form button {
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    background: var(--sun);
+    color: var(--ink);
+    font-weight: 700;
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 14px;
+    padding: 0 16px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--ink);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .custom-form button:hover { transform: translateY(-1px); }
+  .custom-form button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+
+  /* ---------- RECEIPT LIST ---------- */
+  .receipts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .receipt {
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    animation: stampIn 0.28s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes stampIn {
+    0% { transform: scale(1.3) rotate(var(--rot, 0deg)); opacity: 0; }
+    60% { transform: scale(0.96) rotate(var(--rot, 0deg)); opacity: 1; }
+    100% { transform: scale(1) rotate(var(--rot, 0deg)); opacity: 1; }
+  }
+  .receipt-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .receipt-body { flex: 1; min-width: 0; }
+  .receipt-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .receipt-time {
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .receipt-amount {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--coral-dark);
+    white-space: nowrap;
+  }
+  .receipt-delete {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px;
+    margin: -8px;
+    line-height: 1;
+    flex-shrink: 0;
+    border-radius: 8px;
+  }
+  .receipt-delete:hover { color: var(--coral-dark); background: rgba(255,90,95,0.08); }
+
+  .empty-state {
+    text-align: center;
+    padding: 30px 10px;
+    color: var(--ink-soft);
+  }
+  .empty-state .big {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 17px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .empty-state .small { font-size: 13px; }
+
+  .reset-row {
+    text-align: center;
+    margin-top: 28px;
+  }
+  .reset-row button {
+    background: none;
+    border: 2px dashed var(--ink-soft);
+    border-radius: 10px;
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  .reset-row button:hover { color: var(--coral-dark); border-color: var(--coral-dark); }
+  .reset-row button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .reset-row button:disabled:hover { color: var(--ink-soft); border-color: var(--ink-soft); }
+
+  /* ---------- CATEGORY MODAL ---------- */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(43, 33, 24, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 50;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-card {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 16px;
+    padding: 22px 20px;
+    width: 100%;
+    max-width: 340px;
+    box-shadow: 0 6px 0 var(--ink);
+  }
+  .modal-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .modal-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .modal-title {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .modal-field {
+    margin-bottom: 14px;
+  }
+  .modal-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+  }
+  .modal-field input {
+    width: 100%;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    background: #fff;
+    color: var(--ink);
+  }
+  .modal-field input:focus-visible {
+    outline: 3px solid var(--violet);
+    outline-offset: 1px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .modal-actions button {
+    flex: 1;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .modal-actions .btn-cancel {
+    background: #fff;
+    color: var(--ink-soft);
+    box-shadow: 0 3px 0 var(--ink);
+  }
+  .modal-actions .btn-save {
+    background: var(--sun);
+    color: var(--ink);
+    box-shadow: 0 3px 0 var(--ink);
+  }
+  .modal-actions button:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--ink);
+  }
+  .modal-actions button:focus-visible {
+    outline: 3px solid var(--violet);
+    outline-offset: 2px;
+  }
+
+  /* ---------- TABS ---------- */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 22px;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    padding: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink-soft);
+    padding: 9px 0;
+    border-radius: 9px;
+    cursor: pointer;
+  }
+  .tab-btn.active {
+    background: #fff;
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    box-shadow: 0 2px 0 var(--ink);
+  }
+  .tab-btn:focus-visible {
+    outline: 3px solid var(--violet);
+    outline-offset: 2px;
+  }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---------- MONTH VIEW ---------- */
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .month-nav button {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 0 var(--ink);
+  }
+  .month-nav button:active { transform: translateY(2px); box-shadow: none; }
+  .month-nav button:disabled { opacity: 0.35; cursor: default; }
+  .month-nav button:disabled:active { transform: none; box-shadow: 0 2px 0 var(--ink); }
+  .month-nav button:focus-visible { outline: 3px solid var(--violet); outline-offset: 2px; }
+  .month-label {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    min-width: 150px;
+    text-align: center;
+  }
+
+  .month-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .stat-card {
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .stat-card .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .stat-card .stat-value {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .cat-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .cat-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .cat-row .cat-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .cat-row .cat-name {
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+    width: 78px;
+  }
+  .cat-row .cat-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--paper-2);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .cat-row .cat-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+  }
+  .cat-row .cat-amount {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+    text-align: right;
+    width: 84px;
+  }
+
+  .day-group {
+    margin-bottom: 16px;
+  }
+  .day-group-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin: 0 0 8px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  @media (max-width: 380px) {
+    .stamp-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .total-number { font-size: 46px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="date" id="dateLabel">Hari ini</div>
+    <h1>Catatan belanja</h1>
+  </div>
+
+  <div class="tabs">
+    <button type="button" class="tab-btn active" id="tabToday">Hari ini</button>
+    <button type="button" class="tab-btn" id="tabMonth">Bulan ini</button>
+  </div>
+
+  <div class="view active" id="viewToday">
+
+    <div class="total-wrap">
+      <div class="total-number" id="totalNumber">Rp0</div>
+      <div class="total-label">sudah dikeluarkan</div>
+      <div class="budget-jar">
+        <div class="jar-track">
+          <div class="jar-fill" id="jarFill" style="width:0%"></div>
+        </div>
+        <div class="jar-caption">
+          <span id="jarLeftLabel">Rp100.000 sisa</span>
+          <span id="jarPercentLabel">0%</span>
+        </div>
+      </div>
+      <div class="budget-row">
+        Budget harian: Rp <input type="number" id="budgetInput" value="100000" min="0" step="1000">
+      </div>
+    </div>
+
+    <div class="section-label">Ketuk untuk catat belanja</div>
+    <div class="stamp-grid" id="stampGrid"></div>
+
+    <div class="section-label">Atau tambah sendiri</div>
+    <div class="custom-form">
+      <input type="text" id="customName" class="name-input" placeholder="Belanja apa?" maxlength="28">
+      <input type="number" id="customAmt" class="amt-input" placeholder="Rp" min="0" step="500">
+      <button id="customAddBtn">Tambah</button>
+    </div>
+
+    <div class="section-label">Struk hari ini</div>
+    <div class="receipts" id="receiptList"></div>
+
+    <div class="reset-row">
+      <button id="resetBtn">Hapus hari ini</button>
+    </div>
+
+  </div>
+
+  <div class="view" id="viewMonth">
+
+    <div class="month-nav">
+      <button type="button" id="monthPrev" aria-label="Bulan sebelumnya">‹</button>
+      <div class="month-label" id="monthLabel">Juni 2026</div>
+      <button type="button" id="monthNext" aria-label="Bulan berikutnya">›</button>
+    </div>
+
+    <div class="month-stats">
+      <div class="stat-card">
+        <div class="stat-label">Total bulan ini</div>
+        <div class="stat-value" id="monthTotal">Rp0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Rata-rata per hari</div>
+        <div class="stat-value" id="monthAvg">Rp0</div>
+      </div>
+    </div>
+
+    <div class="section-label">Per kategori</div>
+    <div class="cat-breakdown" id="catBreakdown"></div>
+
+    <div class="section-label">Semua transaksi</div>
+    <div id="monthList"></div>
+
+  </div>
+
+</div>
+
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-icon" id="modalIcon"></div>
+      <div class="modal-title">Catat belanja</div>
+    </div>
+    <div class="modal-field">
+      <label for="modalName">Belanja apa?</label>
+      <input type="text" id="modalName" maxlength="28">
+    </div>
+    <div class="modal-field">
+      <label for="modalAmt">Berapa harganya?</label>
+      <input type="number" id="modalAmt" placeholder="Rp" min="0" step="500">
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel" id="modalCancel">Batal</button>
+      <button type="button" class="btn-save" id="modalSave">Tambah</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var CATEGORIES = [
+    { key: 'coffee',   icon: '☕', name: 'Kopi',      cls: 'coffee',    bg: '#FFEAD2', fg: '#B5860C' },
+    { key: 'food',     icon: '🍜', name: 'Makan',     cls: 'food',      bg: '#FFE3DD', fg: '#C23B40' },
+    { key: 'transport',icon: '🚌', name: 'Transport', cls: 'transport', fg: '#1C6FAE', bg: '#E3F3FF' },
+    { key: 'fun',      icon: '🎮', name: 'Hiburan',   cls: 'fun',       fg: '#5C4FA6', bg: '#F1E9FF' },
+    { key: 'shop',     icon: '🛍️', name: 'Belanja',   cls: 'shop',      fg: '#B5860C', bg: '#FFF3D6' },
+    { key: 'bills',    icon: '💡', name: 'Tagihan',   cls: 'bills',     fg: '#1C8C75', bg: '#E1F7EE' },
+    { key: 'health',   icon: '💊', name: 'Kesehatan', cls: 'health',    fg: '#B5447A', bg: '#FFE1EC' },
+    { key: 'other',    icon: '📦', name: 'Lainnya',   cls: 'other',     fg: '#5A5A5A', bg: '#ECECEC' }
+  ];
+  var FALLBACK_ICON = '💸', FALLBACK_BG = '#ECECEC', FALLBACK_FG = '#5A5A5A';
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function dateKey(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+
+  var now = new Date();
+  var todayKey = dateKey(now);
+
+  var state = {
+    byDate: {},
+    budget: 100000
+  };
+
+  var activeCategory = null;
+  var activeTab = 'today';
+  var monthCursor = { year: now.getFullYear(), month: now.getMonth() };
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem('expenseTrackerStateV2');
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        state.byDate = parsed.byDate || {};
+        state.budget = typeof parsed.budget === 'number' ? parsed.budget : 100000;
+        return;
+      }
+      var legacyRaw = localStorage.getItem('expenseTrackerState');
+      if (legacyRaw) {
+        var legacy = JSON.parse(legacyRaw);
+        state.budget = typeof legacy.budget === 'number' ? legacy.budget : 100000;
+        if (legacy.day === todayKey && Array.isArray(legacy.entries)) {
+          state.byDate[todayKey] = legacy.entries;
+        }
+        saveState();
+      }
+    } catch (e) {}
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem('expenseTrackerStateV2', JSON.stringify({
+        byDate: state.byDate,
+        budget: state.budget
+      }));
+    } catch (e) {}
+  }
+
+  function getTodayEntries() {
+    return state.byDate[todayKey] || [];
+  }
+
+  function formatMoney(n) {
+    var rounded = Math.round(n);
+    return 'Rp' + rounded.toLocaleString('id-ID');
+  }
+
+  function renderDate() {
+    var opts = { weekday: 'long', day: 'numeric', month: 'long' };
+    document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('id-ID', opts);
+  }
+
+  function renderStamps() {
+    var grid = document.getElementById('stampGrid');
+    grid.innerHTML = '';
+    CATEGORIES.forEach(function(cat) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'stamp-btn ' + cat.cls;
+      btn.style.background = cat.bg;
+      btn.innerHTML = '<span class="stamp-icon">' + cat.icon + '</span><span class="stamp-name" style="color:' + cat.fg + '">' + cat.name + '</span>';
+      btn.addEventListener('click', function() {
+        openCategoryModal(cat);
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  function addEntry(name, amount, icon, bg, fg) {
+    var entry = {
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      name: name,
+      amount: amount,
+      icon: icon || FALLBACK_ICON,
+      bg: bg || FALLBACK_BG,
+      fg: fg || FALLBACK_FG,
+      time: new Date().toLocaleTimeString('id-ID', { hour: 'numeric', minute: '2-digit' }),
+      rot: (Math.random() * 3 - 1.5).toFixed(2)
+    };
+    if (!state.byDate[todayKey]) state.byDate[todayKey] = [];
+    state.byDate[todayKey].unshift(entry);
+    saveState();
+    renderTotal(true);
+    renderReceipts();
+    updateResetButton();
+  }
+
+  function deleteEntry(id) {
+    var list = state.byDate[todayKey] || [];
+    state.byDate[todayKey] = list.filter(function(e) { return e.id !== id; });
+    saveState();
+    renderTotal(false);
+    renderReceipts();
+    updateResetButton();
+  }
+
+  function getTotal() {
+    return getTodayEntries().reduce(function(sum, e) { return sum + e.amount; }, 0);
+  }
+
+  function renderTotal(bump) {
+    var total = getTotal();
+    var totalEl = document.getElementById('totalNumber');
+    totalEl.textContent = formatMoney(total);
+    if (bump) {
+      totalEl.classList.remove('bump');
+      void totalEl.offsetWidth;
+      totalEl.classList.add('bump');
+    }
+
+    var budget = state.budget > 0 ? state.budget : 0;
+    var pct = budget > 0 ? Math.min(100, (total / budget) * 100) : 100;
+    var fill = document.getElementById('jarFill');
+    fill.style.width = pct + '%';
+    fill.classList.toggle('over', total > budget);
+
+    var left = budget - total;
+    var leftLabel = document.getElementById('jarLeftLabel');
+    if (left >= 0) {
+      leftLabel.textContent = formatMoney(left) + ' sisa';
+    } else {
+      leftLabel.textContent = formatMoney(Math.abs(left)) + ' lebih';
+    }
+    document.getElementById('jarPercentLabel').textContent = Math.round(pct) + '%';
+  }
+
+  function renderReceipts() {
+    var list = document.getElementById('receiptList');
+    list.innerHTML = '';
+    var entries = getTodayEntries();
+    if (entries.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = '<div class="big">Belum ada catatan</div><div class="small">Ketuk salah satu stempel di atas untuk catat belanja pertama hari ini.</div>';
+      list.appendChild(empty);
+      return;
+    }
+    entries.forEach(function(entry) {
+      var row = document.createElement('div');
+      row.className = 'receipt';
+      row.style.setProperty('--rot', entry.rot + 'deg');
+      row.innerHTML =
+        '<div class="receipt-icon" style="background:' + entry.bg + '">' + entry.icon + '</div>' +
+        '<div class="receipt-body">' +
+          '<div class="receipt-name">' + escapeHtml(entry.name) + '</div>' +
+          '<div class="receipt-time">' + entry.time + '</div>' +
+        '</div>' +
+        '<div class="receipt-amount">' + formatMoney(entry.amount) + '</div>' +
+        '<button class="receipt-delete" aria-label="Hapus">✕</button>';
+      row.querySelector('.receipt-delete').addEventListener('click', function() {
+        deleteEntry(entry.id);
+      });
+      list.appendChild(row);
+    });
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function openCategoryModal(cat) {
+    activeCategory = cat;
+    var overlay = document.getElementById('modalOverlay');
+    var icon = document.getElementById('modalIcon');
+    var nameInput = document.getElementById('modalName');
+    var amtInput = document.getElementById('modalAmt');
+
+    icon.textContent = cat.icon;
+    icon.style.background = cat.bg;
+    nameInput.value = cat.name;
+    amtInput.value = '';
+
+    overlay.classList.remove('hidden');
+    nameInput.focus();
+    nameInput.select();
+  }
+
+  function closeCategoryModal() {
+    activeCategory = null;
+    document.getElementById('modalOverlay').classList.add('hidden');
+  }
+
+  function wireModal() {
+    var overlay = document.getElementById('modalOverlay');
+    var nameInput = document.getElementById('modalName');
+    var amtInput = document.getElementById('modalAmt');
+    var saveBtn = document.getElementById('modalSave');
+    var cancelBtn = document.getElementById('modalCancel');
+
+    function submit() {
+      if (!activeCategory) return;
+      var name = nameInput.value.trim() || activeCategory.name;
+      var amt = parseFloat(amtInput.value);
+      if (isNaN(amt) || amt <= 0) {
+        amtInput.focus();
+        return;
+      }
+      addEntry(name, amt, activeCategory.icon, activeCategory.bg, activeCategory.fg);
+      closeCategoryModal();
+    }
+
+    saveBtn.addEventListener('click', submit);
+    cancelBtn.addEventListener('click', closeCategoryModal);
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeCategoryModal();
+    });
+    nameInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') submit(); });
+    amtInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') submit(); });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !overlay.classList.contains('hidden')) closeCategoryModal();
+    });
+  }
+
+  function wireCustomForm() {
+    var nameInput = document.getElementById('customName');
+    var amtInput = document.getElementById('customAmt');
+    var addBtn = document.getElementById('customAddBtn');
+
+    function submit() {
+      var name = nameInput.value.trim();
+      var amt = parseFloat(amtInput.value);
+      if (!name || isNaN(amt) || amt <= 0) {
+        if (!name) nameInput.focus();
+        else amtInput.focus();
+        return;
+      }
+      addEntry(name, amt, FALLBACK_ICON, FALLBACK_BG, FALLBACK_FG);
+      nameInput.value = '';
+      amtInput.value = '';
+      nameInput.focus();
+    }
+
+    addBtn.addEventListener('click', submit);
+    nameInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') submit(); });
+    amtInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') submit(); });
+  }
+
+  function wireBudgetInput() {
+    var input = document.getElementById('budgetInput');
+    input.value = state.budget;
+    input.addEventListener('change', function() {
+      var val = parseFloat(input.value);
+      state.budget = isNaN(val) || val < 0 ? 0 : val;
+      saveState();
+      renderTotal(false);
+    });
+  }
+
+  function wireReset() {
+    var btn = document.getElementById('resetBtn');
+    btn.addEventListener('click', function() {
+      if (getTodayEntries().length === 0) return;
+      if (confirm('Hapus semua catatan belanja hari ini?')) {
+        state.byDate[todayKey] = [];
+        saveState();
+        renderTotal(false);
+        renderReceipts();
+        updateResetButton();
+        if (activeTab === 'month') renderMonthView();
+      }
+    });
+  }
+
+  function updateResetButton() {
+    var btn = document.getElementById('resetBtn');
+    btn.disabled = getTodayEntries().length === 0;
+  }
+
+  /* ---------- TABS ---------- */
+  function wireTabs() {
+    var tabToday = document.getElementById('tabToday');
+    var tabMonth = document.getElementById('tabMonth');
+    var viewToday = document.getElementById('viewToday');
+    var viewMonth = document.getElementById('viewMonth');
+
+    tabToday.addEventListener('click', function() {
+      activeTab = 'today';
+      tabToday.classList.add('active');
+      tabMonth.classList.remove('active');
+      viewToday.classList.add('active');
+      viewMonth.classList.remove('active');
+    });
+
+    tabMonth.addEventListener('click', function() {
+      activeTab = 'month';
+      tabMonth.classList.add('active');
+      tabToday.classList.remove('active');
+      viewMonth.classList.add('active');
+      viewToday.classList.remove('active');
+      renderMonthView();
+    });
+  }
+
+  /* ---------- MONTH VIEW ---------- */
+  var MONTH_NAMES = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+  function getAllDateKeysSorted() {
+    return Object.keys(state.byDate).filter(function(k) {
+      return (state.byDate[k] || []).length > 0;
+    }).sort();
+  }
+
+  function monthHasData(year, month) {
+    var prefix = year + '-' + pad2(month + 1);
+    return getAllDateKeysSorted().some(function(k) { return k.indexOf(prefix) === 0; });
+  }
+
+  function canGoPrevMonth() {
+    var keys = getAllDateKeysSorted();
+    if (keys.length === 0) return false;
+    var earliest = keys[0];
+    var earliestYear = parseInt(earliest.slice(0, 4), 10);
+    var earliestMonth = parseInt(earliest.slice(5, 7), 10) - 1;
+    return (monthCursor.year > earliestYear) || (monthCursor.year === earliestYear && monthCursor.month > earliestMonth);
+  }
+
+  function canGoNextMonth() {
+    return (monthCursor.year < now.getFullYear()) || (monthCursor.year === now.getFullYear() && monthCursor.month < now.getMonth());
+  }
+
+  function wireMonthNav() {
+    document.getElementById('monthPrev').addEventListener('click', function() {
+      if (!canGoPrevMonth()) return;
+      monthCursor.month -= 1;
+      if (monthCursor.month < 0) { monthCursor.month = 11; monthCursor.year -= 1; }
+      renderMonthView();
+    });
+    document.getElementById('monthNext').addEventListener('click', function() {
+      if (!canGoNextMonth()) return;
+      monthCursor.month += 1;
+      if (monthCursor.month > 11) { monthCursor.month = 0; monthCursor.year += 1; }
+      renderMonthView();
+    });
+  }
+
+  function renderMonthView() {
+    document.getElementById('monthLabel').textContent = MONTH_NAMES[monthCursor.month] + ' ' + monthCursor.year;
+    document.getElementById('monthPrev').disabled = !canGoPrevMonth();
+    document.getElementById('monthNext').disabled = !canGoNextMonth();
+
+    var prefix = monthCursor.year + '-' + pad2(monthCursor.month + 1);
+    var keysInMonth = getAllDateKeysSorted().filter(function(k) { return k.indexOf(prefix) === 0; });
+
+    var total = 0;
+    var catTotals = {};
+    var dayCount = keysInMonth.length;
+
+    keysInMonth.forEach(function(k) {
+      (state.byDate[k] || []).forEach(function(entry) {
+        total += entry.amount;
+        var catKey = entry.name;
+        var matchedCat = CATEGORIES.find(function(c) { return c.icon === entry.icon && c.name === entry.name; });
+        var groupKey = matchedCat ? matchedCat.key : (CATEGORIES.find(function(c){ return c.icon === entry.icon; }) ? CATEGORIES.find(function(c){ return c.icon === entry.icon; }).key : 'lainnya');
+        if (!catTotals[groupKey]) {
+          var catMeta = CATEGORIES.find(function(c) { return c.key === groupKey; });
+          catTotals[groupKey] = {
+            label: catMeta ? catMeta.name : 'Lainnya',
+            icon: catMeta ? catMeta.icon : FALLBACK_ICON,
+            bg: catMeta ? catMeta.bg : FALLBACK_BG,
+            fg: catMeta ? catMeta.fg : FALLBACK_FG,
+            amount: 0
+          };
+        }
+        catTotals[groupKey].amount += entry.amount;
+      });
+    });
+
+    document.getElementById('monthTotal').textContent = formatMoney(total);
+    var avg = dayCount > 0 ? total / dayCount : 0;
+    document.getElementById('monthAvg').textContent = formatMoney(avg);
+
+    var breakdownEl = document.getElementById('catBreakdown');
+    breakdownEl.innerHTML = '';
+    var catList = Object.keys(catTotals).map(function(k) { return catTotals[k]; }).sort(function(a, b) { return b.amount - a.amount; });
+
+    if (catList.length === 0) {
+      var emptyCat = document.createElement('div');
+      emptyCat.className = 'empty-state';
+      emptyCat.innerHTML = '<div class="big">Belum ada data</div><div class="small">Belum ada belanja tercatat di bulan ini.</div>';
+      breakdownEl.appendChild(emptyCat);
+    } else {
+      var maxAmount = catList[0].amount;
+      catList.forEach(function(c) {
+        var row = document.createElement('div');
+        row.className = 'cat-row';
+        var pct = maxAmount > 0 ? Math.max(4, (c.amount / maxAmount) * 100) : 0;
+        row.innerHTML =
+          '<div class="cat-icon" style="background:' + c.bg + '">' + c.icon + '</div>' +
+          '<div class="cat-name">' + escapeHtml(c.label) + '</div>' +
+          '<div class="cat-bar-track"><div class="cat-bar-fill" style="width:' + pct + '%; background:' + c.fg + '"></div></div>' +
+          '<div class="cat-amount">' + formatMoney(c.amount) + '</div>';
+        breakdownEl.appendChild(row);
+      });
+    }
+
+    var listEl = document.getElementById('monthList');
+    listEl.innerHTML = '';
+    if (keysInMonth.length === 0) {
+      var emptyList = document.createElement('div');
+      emptyList.className = 'empty-state';
+      emptyList.innerHTML = '<div class="big">Belum ada transaksi</div><div class="small">Transaksi bulan ini akan muncul di sini.</div>';
+      listEl.appendChild(emptyList);
+      return;
+    }
+
+    keysInMonth.slice().reverse().forEach(function(k) {
+      var entries = state.byDate[k] || [];
+      if (entries.length === 0) return;
+      var group = document.createElement('div');
+      group.className = 'day-group';
+      var d = new Date(k + 'T00:00:00');
+      var labelOpts = { weekday: 'long', day: 'numeric', month: 'long' };
+      var dayTotal = entries.reduce(function(sum, e) { return sum + e.amount; }, 0);
+      var labelDiv = document.createElement('div');
+      labelDiv.className = 'day-group-label';
+      labelDiv.textContent = d.toLocaleDateString('id-ID', labelOpts) + ' — ' + formatMoney(dayTotal);
+      group.appendChild(labelDiv);
+
+      var receiptsWrap = document.createElement('div');
+      receiptsWrap.className = 'receipts';
+      entries.forEach(function(entry) {
+        var row = document.createElement('div');
+        row.className = 'receipt';
+        row.style.setProperty('--rot', (entry.rot || 0) + 'deg');
+        row.innerHTML =
+          '<div class="receipt-icon" style="background:' + entry.bg + '">' + entry.icon + '</div>' +
+          '<div class="receipt-body">' +
+            '<div class="receipt-name">' + escapeHtml(entry.name) + '</div>' +
+            '<div class="receipt-time">' + entry.time + '</div>' +
+          '</div>' +
+          '<div class="receipt-amount">' + formatMoney(entry.amount) + '</div>';
+        receiptsWrap.appendChild(row);
+      });
+      group.appendChild(receiptsWrap);
+      listEl.appendChild(group);
+    });
+  }
+
+  loadState();
+  renderDate();
+  renderStamps();
+  wireModal();
+  wireCustomForm();
+  wireBudgetInput();
+  wireReset();
+  wireTabs();
+  wireMonthNav();
+  renderTotal(false);
+  renderReceipts();
+  updateResetButton();
+})();
+</script>
+</body>
+</html>
